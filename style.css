@@ -67,6 +67,27 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== THEME TRANSITION ===== */
+/* Minimal, smooth crossfade on the main surfaces whenever data-theme changes */
+body,
+#navbar,
+section,
+footer,
+.terminal-window,
+.terminal-bar,
+.avatar-photo-wrap,
+.status-badge,
+.club-badge,
+.stat-item,
+.skill-icon-slide,
+.contact-form,
+.contact-form input,
+.contact-form textarea,
+.contact-item,
+#preloader {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
 /* ===== PRELOADER ===== */
 #preloader {
   position: fixed;
@@ -138,6 +159,58 @@ body.preloader-active {
   overflow: hidden;
 }
 
+/* ===== BACKGROUND PHOTO LAYER ===== */
+#bg-photo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('assets/bg-cyber.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.32;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+[data-theme="light"] #bg-photo { opacity: 0.16; mix-blend-mode: multiply; }
+
+/* ===== PARALLAX BACKGROUND ===== */
+#bg-parallax {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.parallax-shape {
+  position: absolute;
+  will-change: transform;
+  color: var(--green);
+  opacity: 0.10;
+  font-family: var(--font-mono);
+  user-select: none;
+}
+
+.parallax-shape.ring {
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  opacity: 0.08;
+}
+
+.parallax-shape.hex {
+  font-size: 2.4rem;
+  opacity: 0.10;
+}
+
+.parallax-shape.glyph {
+  font-size: 1rem;
+  opacity: 0.14;
+  letter-spacing: 0.1em;
+}
+
+[data-theme="light"] .parallax-shape { opacity: 0.06; }
+[data-theme="light"] .parallax-shape.glyph { opacity: 0.09; }
+
 /* ===== MATRIX CANVAS ===== */
 #matrix-canvas {
   position: fixed;
@@ -187,7 +260,8 @@ body.preloader-active {
   font-size: 1.2rem;
   color: var(--green);
   letter-spacing: 0.05em;
-  cursor: default;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .nav-actions {
@@ -327,6 +401,14 @@ section:not(#hero) {
   width: 100%;
 }
 
+/* ===== HERO ENTRANCE ===== */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-up.is-visible { opacity: 1; transform: translateY(0); }
+
 /* terminal */
 .terminal-window {
   background: var(--bg2);
@@ -334,6 +416,13 @@ section:not(#hero) {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 0 60px rgba(0,255,136,0.05);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+}
+
+.terminal-window:hover {
+  box-shadow: 0 0 80px rgba(0,255,136,0.12);
 }
 
 .terminal-bar {
@@ -397,6 +486,51 @@ section:not(#hero) {
   color: var(--text-bright);
   letter-spacing: -0.03em;
   margin-bottom: 1rem;
+  position: relative;
+}
+
+/* ===== GLITCH EFFECT ===== */
+.hero-name.glitching {
+  animation: glitchShake 0.35s linear;
+}
+.hero-name.glitching::before,
+.hero-name.glitching::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+.hero-name.glitching::before {
+  color: #ff4444;
+  clip-path: inset(10% 0 65% 0);
+  transform: translate(-3px, -1px);
+  opacity: 0.8;
+  animation: glitchTop 0.35s linear;
+}
+.hero-name.glitching::after {
+  color: #00e0ff;
+  clip-path: inset(60% 0 10% 0);
+  transform: translate(3px, 1px);
+  opacity: 0.8;
+  animation: glitchBottom 0.35s linear;
+}
+
+@keyframes glitchShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 1px); }
+}
+@keyframes glitchTop {
+  0%, 100% { clip-path: inset(10% 0 65% 0); }
+  50% { clip-path: inset(25% 0 40% 0); }
+}
+@keyframes glitchBottom {
+  0%, 100% { clip-path: inset(60% 0 10% 0); }
+  50% { clip-path: inset(35% 0 30% 0); }
 }
 
 .accent { color: var(--green); }
@@ -451,7 +585,23 @@ section:not(#hero) {
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+
+.btn:hover::after { left: 130%; }
 
 .btn-primary {
   background: var(--green);
@@ -497,16 +647,21 @@ section:not(#hero) {
   position: relative;
 }
 
-/* Avatar photo from Pinterest */
+/* Avatar / ASCII portrait */
 .avatar-photo-wrap {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
+  width: min(300px, 82vw);
+  border-radius: 8px;
   overflow: hidden;
-  border: 2px solid var(--green);
+  border: 1px solid var(--border);
   position: relative;
   flex-shrink: 0;
   z-index: 1;
+  background: #050807;
+  padding: 12px;
+  box-shadow: 0 0 50px rgba(0,255,136,0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .avatar-photo {
@@ -514,6 +669,19 @@ section:not(#hero) {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.ascii-photo {
+  font-family: var(--font-mono);
+  font-size: clamp(2.1px, 0.62vw, 2.8px);
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--green);
+  white-space: pre;
+  margin: 0;
+  width: fit-content;
+  text-shadow: 0 0 2px rgba(0,255,136,0.35);
+  user-select: none;
 }
 
 @keyframes morphBorder {
@@ -536,7 +704,7 @@ section:not(#hero) {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 180px; height: 180px;
+  width: min(300px, 82vw); height: min(300px, 82vw);
   background: radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
@@ -886,8 +1054,8 @@ footer .accent { color: var(--green); }
 
   /* About */
   .about-grid { gap: 2rem; }
-  .avatar-photo-wrap { width: 140px; height: 140px; }
-  .avatar-glow { width: 140px; height: 140px; }
+  .avatar-photo-wrap { width: min(220px, 78vw); }
+  .avatar-glow { width: min(220px, 78vw); height: min(220px, 78vw); }
   .about-stats { gap: 1rem; flex-wrap: wrap; }
   .stat-num { font-size: 1.4rem; }
   .club-badge { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
