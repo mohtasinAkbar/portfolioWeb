@@ -107,6 +107,7 @@ const typedEl = document.getElementById('typed-text');
 const outputEl = document.getElementById('terminal-output');
 
 function typeNextLine() {
+  if (!typedEl || !outputEl) return;
   if (lineIndex >= lines.length) {
     setTimeout(() => {
       lineIndex = 0; charIndex = 0;
@@ -143,7 +144,91 @@ function typeNextLine() {
   }
 }
 
-setTimeout(typeNextLine, 800);
+if (typedEl && outputEl) setTimeout(typeNextLine, 800);
+
+/* ===== PARALLAX BACKGROUND ===== */
+(function () {
+  const shapes = document.querySelectorAll('.parallax-shape');
+  if (!shapes.length) return;
+
+  let ticking = false;
+
+  function updateParallax() {
+    const y = window.scrollY;
+    shapes.forEach(el => {
+      const speed = parseFloat(el.dataset.speed) || 0.2;
+      const rotate = el.dataset.rotate === 'true';
+      const offset = y * speed;
+      el.style.transform = rotate
+        ? `translateY(${offset}px) rotate(${offset * 0.15}deg)`
+        : `translateY(${offset}px)`;
+    });
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateParallax);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateParallax();
+})();
+
+/* ===== HERO ENTRANCE + GLITCH + TILT ===== */
+(function () {
+  const terminal = document.querySelector('.terminal-window');
+  const heroText = document.querySelector('.hero-text');
+  const heroName = document.querySelector('.hero-name');
+  if (!terminal && !heroText) return; // not on hero page
+
+  // Staggered entrance
+  const revealTargets = [terminal, heroText].filter(Boolean);
+  revealTargets.forEach(el => el.classList.add('reveal-up'));
+
+  function playReveal() {
+    revealTargets.forEach((el, i) => {
+      setTimeout(() => el.classList.add('is-visible'), i * 180);
+    });
+  }
+
+  const preloader = document.getElementById('preloader');
+  if (preloader && !preloader.classList.contains('preloader-hidden')) {
+    const obs = new MutationObserver(() => {
+      if (preloader.classList.contains('preloader-hidden')) {
+        playReveal();
+        obs.disconnect();
+      }
+    });
+    obs.observe(preloader, { attributes: true, attributeFilter: ['class'] });
+  } else {
+    playReveal();
+  }
+
+  // Periodic glitch on the name
+  if (heroName) {
+    function triggerGlitch() {
+      heroName.classList.add('glitching');
+      setTimeout(() => heroName.classList.remove('glitching'), 350);
+      setTimeout(triggerGlitch, 4000 + Math.random() * 3000);
+    }
+    setTimeout(triggerGlitch, 2500);
+  }
+
+  // Mouse-follow 3D tilt on the terminal window
+  if (terminal) {
+    terminal.addEventListener('mousemove', (e) => {
+      const rect = terminal.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      terminal.style.transform = `perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg)`;
+    });
+    terminal.addEventListener('mouseleave', () => {
+      terminal.style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg)';
+    });
+  }
+})();
 
 /* ===== NAVBAR SCROLL ===== */
 const navbar = document.getElementById('navbar');
